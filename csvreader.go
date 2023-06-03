@@ -1,7 +1,7 @@
-package internal
+package main
 
 import (
-	"io"
+	"os"
 
 	"github.com/gocarina/gocsv"
 	log "golang.org/x/exp/slog"
@@ -9,6 +9,7 @@ import (
 
 // CarRecord will hold each row from the dataset
 type CarRecord struct {
+	Id                int64  `json:"id"`
 	Company           string `csv:"Company"`
 	Model             string `csv:"Model"`
 	Horsepower        string `csv:"Horsepower"`
@@ -24,10 +25,10 @@ type CarRecord struct {
 	NumberofCylinders string `csv:"Number of Cylinders"`
 }
 
-func CsvReader(in io.Reader, inputFile string) ([]*CarRecord, error) {
+func CsvReader(file *os.File) ([]*CarRecord, error) {
 	// store each row into a object
 	cars := []*CarRecord{}
-	if err := gocsv.Unmarshal(in, &cars); err != nil {
+	if err := gocsv.Unmarshal(file, &cars); err != nil {
 		log.Error("Unable to unmarshal file contents", "filename", inputFile, "err", err)
 		return nil, err
 	}

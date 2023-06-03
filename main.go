@@ -3,12 +3,10 @@ package main
 import (
 	"os"
 
-	"github.com/phllpmcphrsn/KaggleCarAPI/internal/csvreader"
 	log "golang.org/x/exp/slog"
 )
 
 const inputFile string = "resources/Car_Models.csv"
-
 
 
 func setLogger() {
@@ -17,6 +15,11 @@ func setLogger() {
 }
 
 func main() {
+	var (
+		carRecords []*CarRecord
+		err error
+	)
+
 	setLogger()
 
 	// open file
@@ -27,5 +30,10 @@ func main() {
 	}
 	defer f.Close()
 	
-	
+	carRecords, err = CsvReader(f)
+	if err != nil {
+		panic(err)
+	}
+
+	StartRouter(":9090", carRecords)
 }
