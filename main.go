@@ -21,11 +21,17 @@ func main() {
 	)
 
 	setLogger()
+	store, err := NewPostgresStore()
+	if err != nil {
+		log.Error("There was an issue reaching the database")
+		panic(err)
+	}
+	log.Info("Connected to database...", "db", store.db.Stats())
 
 	// open file
 	f, err := os.Open(inputFile)
 	if err != nil {
-		log.Error("Unable to read/open file", "filename", inputFile, "err", err)
+		log.Error("Unable to read/open file", "filename", inputFile)
 		panic(err)
 	}
 	defer f.Close()

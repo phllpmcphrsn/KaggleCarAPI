@@ -1,0 +1,16 @@
+{
+    "id": 10,
+    "Company": "Chevrolet",
+    "Model": "Cobalt",
+    "Horsepower": "117 bhp @ 3500 rpm",
+    "Torque": "250 Nm @ 1500-2000 rpm",
+    "TransmissionType": "5-speed manual, 6-speed automatic",
+    "Drivetrain": "Rear-wheel drive, all-wheel drive",
+    "FuelEconomy": "15.2 kmpl / 18 kmpl",
+    "NumberOfDoors": "5",
+    "Price": "₹10.55 Lakh - ₹16.78 Lakh",
+    "ModelYearRange": "2020-present",
+    "BodyType": "SUV",
+    "EngineType": "2.0L turbocharged diesel",       
+    "NumberofCylinders": "4"
+}

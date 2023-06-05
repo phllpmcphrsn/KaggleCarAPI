@@ -9,7 +9,7 @@ import (
 
 // CarRecord will hold each row from the dataset
 type CarRecord struct {
-	Id                int64  `json:"id"`
+	Id                int  `json:"id"`
 	Company           string `csv:"Company"`
 	Model             string `csv:"Model"`
 	Horsepower        string `csv:"Horsepower"`
