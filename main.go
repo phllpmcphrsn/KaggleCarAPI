@@ -28,6 +28,11 @@ func main() {
 	}
 	log.Info("Connected to database...", "db", store.db.Stats())
 
+	if err := store.Init(); err != nil {
+		log.Error("There was an issue initializing the database", "err", err)
+		panic(err)
+	}
+	
 	// open file
 	f, err := os.Open(inputFile)
 	if err != nil {
