@@ -25,6 +25,11 @@ type CreateCarRequest struct {
 // within this struct instead of making two separate structs (i.e. separating year range, money conversions)
 // CarRecord will hold each row from the dataset
 type CarRecord struct {
+	Car Car
+	ModelYearRange    string    `csv:"Model Year Range"`
+}
+
+type Car struct {
 	ID                int       `json:"id"`
 	Company           string    `csv:"Company" json:"company"`
 	Model             string    `csv:"Model" json:"model"`
@@ -35,7 +40,6 @@ type CarRecord struct {
 	FuelEconomy       string    `csv:"Fuel Economy" json:"fuelEconomy"`
 	NumberOfDoors     string    `csv:"Number of Doors" json:"numberOfDoors"`
 	Price             string    `csv:"Price" json:"price"`
-	ModelYearRange    string    `csv:"Model Year Range"`
 	StartYear         int       `json:"startYear"`
 	EndYear           int       `json:"endYear"`
 	BodyType          string    `csv:"Body Type" json:"bodyType"`
@@ -43,3 +47,4 @@ type CarRecord struct {
 	NumberofCylinders string    `csv:"Number of Cylinders" json:"numberOfCylinders"`
 	CreatedAt         time.Time `json:"createdAt"`
 }
+
