@@ -7,7 +7,7 @@ import (
 	log "golang.org/x/exp/slog"
 )
 
-var cars []*CarRecord
+var cars []*Car
 
 // Ping test
 func ping(c *gin.Context) {
@@ -34,7 +34,7 @@ func getCarById(c *gin.Context) {
 }
 
 // carById is a helper function for retrieving records by id
-func carById(id string) (*CarRecord, error) {
+func carById(id string) (*Car, error) {
 	return cars[1], nil
 }
 
@@ -42,7 +42,7 @@ func carById(id string) (*CarRecord, error) {
 
 // createCar adds a new car to the db
 func createCar(c *gin.Context) {
-	var newCar CarRecord
+	var newCar Car
 
 	if err := c.BindJSON(&newCar); err != nil {
 		return
@@ -53,8 +53,8 @@ func createCar(c *gin.Context) {
 }
 
 
-func StartRouter(port string, carRecords []*CarRecord) {
-	cars = carRecords
+func StartRouter(port string, c []*Car) {
+	cars = c
 	r := gin.Default()
 	
 	r.GET("/ping", ping)

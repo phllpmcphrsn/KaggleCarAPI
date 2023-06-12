@@ -16,14 +16,14 @@ func setLogger() {
 
 func main() {
 	var (
-		carRecords []*CarRecord
+		cars []*Car
 		err error
 	)
 
 	setLogger()
 	store, err := NewPostgresStore()
 	if err != nil {
-		log.Error("There was an issue reaching the database")
+		log.Error("There was an issue reaching the database", "err", err)
 		panic(err)
 	}
 	log.Info("Connected to database...", "db", store.db.Stats())
@@ -41,10 +41,10 @@ func main() {
 	}
 	defer f.Close()
 	
-	carRecords, err = CsvReader(f)
+	cars, err = CsvReader(f)
 	if err != nil {
 		panic(err)
 	}
 
-	StartRouter(":9090", carRecords)
+	StartRouter(":9090", cars)
 }
