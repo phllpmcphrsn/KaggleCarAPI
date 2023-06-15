@@ -11,32 +11,32 @@ import (
 	log "golang.org/x/exp/slog"
 )
 
-func CsvReader(file *os.File, db CarDB) ([]*Car, error) {
+func CsvReader(file *os.File, db CarDB) error {
 	// store each row into a struct
 	carRecords := []*CarRecord{}
 	if err := gocsv.Unmarshal(file, &carRecords); err != nil {
 		log.Error("Unable to unmarshal file contents", "filename", inputFile, "err", err)
-		return nil, err
+		return err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	cars := make([]*Car, len(carRecords))
+	// cars := make([]*Car, len(carRecords))
 	for _, carRecord := range carRecords {
 		err := clean(carRecord); if err != nil {
-			return nil, err
+			return err
 		}
 		
 		car := carRecord.Car
 		err = db.CreateCar(ctx, car); if err != nil {
 			log.Error("Could not insert Car into database", "car", car.String(), "err", err)
-			return nil, err
+			return err
 		}
 	}
 
 	// instead of returning here, I think we should just store the Cars into the DB
-	return cars, nil
+	return nil
 }
 
 // clean takes a car and cleans up the data for price and model year range

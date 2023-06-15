@@ -40,7 +40,7 @@ func main() {
 	}
 	defer f.Close()
 
-	cars, err = CsvReader(f, store)
+	err = CsvReader(f, store)
 	if err != nil {
 		panic(err)
 	}
