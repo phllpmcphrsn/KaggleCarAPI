@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"strconv"
 	"strings"
@@ -10,7 +11,7 @@ import (
 	log "golang.org/x/exp/slog"
 )
 
-func CsvReader(file *os.File) ([]*Car, error) {
+func CsvReader(file *os.File, db CarDB) ([]*Car, error) {
 	// store each row into a struct
 	carRecords := []*CarRecord{}
 	if err := gocsv.Unmarshal(file, &carRecords); err != nil {
@@ -18,15 +19,23 @@ func CsvReader(file *os.File) ([]*Car, error) {
 		return nil, err
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
 	cars := make([]*Car, len(carRecords))
-	for i, carRecord := range carRecords {
+	for _, carRecord := range carRecords {
 		err := clean(carRecord); if err != nil {
 			return nil, err
 		}
+		
 		car := carRecord.Car
-		cars[i] = &car
+		err = db.CreateCar(ctx, car); if err != nil {
+			log.Error("Could not insert Car into database", "car", car.String(), "err", err)
+			return nil, err
+		}
 	}
 
+	// instead of returning here, I think we should just store the Cars into the DB
 	return cars, nil
 }
 
@@ -71,7 +80,7 @@ func cleanYears(c *CarRecord) error {
 // checkEndYear checks if the ending year is "present"; if so replace "present" with the current year
 func checkEndYear(endYear string) (int, error) {
 	endYear = strings.ToLower(endYear)
-	if endYear == "present" {
+	if endYear == "present" || endYear == "" {
 		return time.Now().Year(), nil
 	}
 	return strconv.Atoi(endYear)

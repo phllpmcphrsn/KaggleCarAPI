@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+
 	_ "github.com/lib/pq"
+	log "golang.org/x/exp/slog"
 )
 
+// TODO create custom db errors
 type CarDB interface {
-	CreateCar(*CarRecord) error
+	CreateCar(context.Context, *Car) error
+	GetCar(*Car) error
 	GetCars() error
-	GetCarById(int) (*CarRecord, error)
+	GetCarById(int) (*Car, error)
 }
 
 type PostGresStore struct {
@@ -35,10 +40,9 @@ func (p *PostGresStore) Init() error {
 	return p.createTable()
 }
 
-// TODO split out model_year_range to be start and end years. also, should those years be int or date?
 // TODO figure out Lakh is easily taken by the (Postgres) money data type
 func (p *PostGresStore) createTable() error {
-	query := `create table if not exists cars (
+	stmt := `create table if not exists cars (
 		id serial primary key,
 		company varchar(50),
 		model varchar(50), 
@@ -48,7 +52,7 @@ func (p *PostGresStore) createTable() error {
 		drivetrain varchar(50), 
 		fuel_economy varchar(50), 
 		number_of_doors varchar(50), 
-		price money, 
+		price varchar(50), 
 		start_year integer, 
 		emd_year integer,
 		body_type varchar(50), 
@@ -57,6 +61,65 @@ func (p *PostGresStore) createTable() error {
 		create_at timestamp 
 	)`
 
-	_, err := p.db.Exec(query)
+	_, err := p.db.Exec(stmt)
 	return err
 }
+
+func (p *PostGresStore) CreateCar(ctx context.Context, c *Car) error { 
+	log.Debug("Inserting a car into DB", "car", c.String())
+	insertStmt := `
+	INSERT INTO cars (
+		id, 
+		company, 
+		model, 
+		horsepower,
+		torque, 
+		transmission_type, 
+		drivetrain, 
+		fuel_economy, 
+		number_of_doors, 
+		price, 
+		start_year, 
+		end_year, 
+		body_type, 
+		engine_type, 
+		number_of_cyclinders, 
+		created_at
+	)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	stmt, err := p.db.PrepareContext(ctx, insertStmt)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		c.ID, 
+		c.Company, 
+		c.Model, 
+		c.Horsepower, 
+		c.Torque, 
+		c.TransmissionType, 
+		c.Drivetrain, 
+		c.FuelEconomy, 
+		c.NumberOfDoors,
+		c.Price,
+		c.StartYear,
+		c.EndYear,
+		c.BodyType,
+		c.EngineType,
+		c.NumberofCylinders,
+		c.CreatedAt,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil 
+}
+
+func (p *PostGresStore) GetCar(c *Car) error { return nil }
+func (p *PostGresStore) GetCars() error { return nil }
+func (p *PostGresStore) GetCarById(int) (*Car, error) {return &Car{}, nil}

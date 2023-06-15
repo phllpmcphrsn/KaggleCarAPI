@@ -9,22 +9,35 @@ import (
 
 var cars []*Car
 
+// APIServer is a gin RESTful API that will handle incoming requests for Cars.
+type APIServer struct {
+	db CarDB
+	listenAddr string
+}
+
+func NewAPIServer(db CarDB, listenAddr string) *APIServer {
+	return &APIServer{
+		db: db,
+		listenAddr: listenAddr,
+	}
+}
+
 // Ping test
-func ping(c *gin.Context) {
+func (a *APIServer) ping(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, cars)
 }
 
 // GET endpoints/methods
 
 // getCars returns all cars
-func getCars(c *gin.Context) {
+func (a *APIServer) getCars(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, cars)
 }
 
 // getCarById gets a car by the id supplied in the path
-func getCarById(c *gin.Context) {
+func (a *APIServer) getCarById(c *gin.Context) {
 	id := c.Param("id")
-	car, err := carById(id)
+	car, err := a.carById(id)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Car not found."})
 		log.Error("Car not found", "err", err)
@@ -34,33 +47,39 @@ func getCarById(c *gin.Context) {
 }
 
 // carById is a helper function for retrieving records by id
-func carById(id string) (*Car, error) {
+func(a *APIServer) carById(id string) (*Car, error) {
 	return cars[1], nil
 }
 
 // POST endpoints/methods
 
 // createCar adds a new car to the db
-func createCar(c *gin.Context) {
-	var newCar Car
-
+func (a *APIServer) createCar(c *gin.Context) {
+	var (
+		newCar Car
+		err	error
+	) 
+	
 	if err := c.BindJSON(&newCar); err != nil {
 		return
 	}
 
-	cars = append(cars, &newCar)
+	// TODO check for duplicates. Call to DB with Car given (SELECT-statement)
+	if err = a.db.CreateCar(c, &newCar); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Could not insert Car into DB."})
+		return
+	}
 	c.IndentedJSON(http.StatusCreated, newCar)
 }
 
 
-func StartRouter(port string, c []*Car) {
-	cars = c
+func (a *APIServer) StartRouter() {
 	r := gin.Default()
 	
-	r.GET("/ping", ping)
-	r.GET("/cars", getCars)
-	r.GET("/cars/:id", getCarById)
-	r.POST("/cars", createCar)
+	r.GET("/ping", a.ping)
+	r.GET("/cars", a.getCars)
+	r.GET("/cars/:id", a.getCarById)
+	r.POST("/cars", a.createCar)
 
-	r.Run(port)
+	r.Run(a.listenAddr)
 }
