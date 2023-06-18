@@ -27,12 +27,25 @@ func main() {
 	if err := store.Init(); err != nil {
 		log.Error("There was an issue initializing the database", "err", err)
 		panic(err)
+	} 
+
+	// want to check if table has any elements prior to read and populating from csv
+	// if it does we'll assume that it's already been populated with data from csv
+	count, err := store.Count()
+	if err != nil {
+		log.Error("An error occured while checking for table's count", "err", err)
+		panic(err)
+	} else if count == 0 {
+		log.Info("Populating cars table...")
+		go readCsv(store)
 	}
 
 	api := NewAPIServer(store, ":9090")
 	api.StartRouter()
 
-	// open file
+}
+
+func readCsv(store *PostGresStore) {
 	f, err := os.Open(inputFile)
 	if err != nil {
 		log.Error("Unable to read/open file", "filename", inputFile)
@@ -44,5 +57,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 }

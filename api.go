@@ -31,24 +31,24 @@ func (a *APIServer) ping(c *gin.Context) {
 
 // getCars returns all cars
 func (a *APIServer) getCars(c *gin.Context) {
+	cars, err := a.db.GetCars(c)
+	if err != nil {
+		log.Error("There was an issue retrieving rows of Cars", "err", err)
+		return
+	}
 	c.IndentedJSON(http.StatusOK, cars)
 }
 
 // getCarById gets a car by the id supplied in the path
 func (a *APIServer) getCarById(c *gin.Context) {
 	id := c.Param("id")
-	car, err := a.carById(id)
+	car, err := a.db.GetCarById(c, id)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Car not found."})
 		log.Error("Car not found", "err", err)
 		return
 	}
 	c.IndentedJSON(http.StatusOK, car)
-}
-
-// carById is a helper function for retrieving records by id
-func(a *APIServer) carById(id string) (*Car, error) {
-	return cars[1], nil
 }
 
 // POST endpoints/methods
