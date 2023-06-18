@@ -18,24 +18,24 @@ func CsvReader(file *os.File, db CarDB) error {
 		log.Error("Unable to unmarshal file contents", "filename", inputFile, "err", err)
 		return err
 	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-
-	// cars := make([]*Car, len(carRecords))
+	
+	createdAt := time.Now().UTC()
 	for _, carRecord := range carRecords {
 		err := clean(carRecord); if err != nil {
+			log.Error("There was an issue cleaning a CarRecord", "car", carRecord)
 			return err
 		}
 		
 		car := carRecord.Car
+		car.CreatedAt = createdAt
 		err = db.CreateCar(ctx, car); if err != nil {
 			log.Error("Could not insert Car into database", "car", car.String(), "err", err)
 			return err
 		}
 	}
 
-	// instead of returning here, I think we should just store the Cars into the DB
 	return nil
 }
 
@@ -53,13 +53,11 @@ func cleanYears(c *CarRecord) error {
 	if trimmedYearRange == "" {
 		return nil
 	}
-	
 	// the year range may have spacing between the hyphen and years (i.e. 2008 - 2012)
 	// we eliminate those then split about the hyphen to produce a two-element array
 	// (i.e. [2008, 2012])
 	yearRange := strings.Split(trimmedYearRange, "-")
 	car := c.Car
-	
 	car.StartYear, err = strconv.Atoi(yearRange[0]); if err != nil {
 		log.Error("There was an issue cleaning the Model Year Range for the starting year", "err", err)
 		return err
