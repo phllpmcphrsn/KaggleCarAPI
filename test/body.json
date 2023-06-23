@@ -8,8 +8,8 @@
     "fuelEconomy": "15.2 kmpl / 18 kmpl",
     "numberOfDoors": "5",
     "price": "₹10.55 Lakh - ₹16.78 Lakh",
-    "startYear": "2020",
-    "endYear": "present",
+    "startYear": 2020,
+    "endYear": 0,
     "bodyType": "SUV",
     "engineType": "2.0L turbocharged diesel",       
     "numberofCylinders": "4"

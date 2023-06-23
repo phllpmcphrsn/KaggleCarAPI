@@ -5,24 +5,6 @@ import (
 	"time"
 )
 
-// CreateCarRequest
-type CreateCarRequest struct {
-	Company           string `json:"Company"`
-	Model             string `json:"Model"`
-	Horsepower        string `json:"Horsepower"`
-	Torque            string `json:"Torque"`
-	TransmissionType  string `json:"Transmission Type"`
-	Drivetrain        string `json:"Drivetrain"`
-	FuelEconomy       string `json:"Fuel Economy"`
-	NumberOfDoors     string `json:"Number of Doors"`
-	Price             string `json:"Price"`
-	StartYear         int    `json:"startYear"`
-	EndYear           int    `json:"endYear"`
-	BodyType          string `json:"Body Type"`
-	EngineType        string `json:"Engine Type"`
-	NumberofCylinders string `json:"Number of Cylinders"`
-}
-
 // TODO split out model_year_range to be start and end years. also, should those years be int or date?
 // TODO transform this into a Car instead of a CarRecord. Essentially, we'll do any and all trasformations
 // within this struct instead of making two separate structs (i.e. separating year range, money conversions)
@@ -51,14 +33,24 @@ type Car struct {
 	CreatedAt         time.Time `json:"createdAt"`
 }
 
-func NewCar(company string, model string, price string, year int, numOfDoors string) *Car {
+// NewCar creates a new Car instance with the given parameters
+func NewCar(company, model, horsepower, torque, transmissionType, drivetrain, fuelEconomy, numberOfDoors, price, bodyType, engineType, numberOfCylinders string, startYear, endYear int) *Car {
 	return &Car{
-		Company: company,
-		Model: model,
-		Price: price,
-		StartYear: year,
-		NumberOfDoors: numOfDoors,
-		CreatedAt: time.Now().UTC(),
+		Company:           company,
+		Model:             model,
+		Horsepower:        horsepower,
+		Torque:            torque,
+		TransmissionType:  transmissionType,
+		Drivetrain:        drivetrain,
+		FuelEconomy:       fuelEconomy,
+		NumberOfDoors:     numberOfDoors,
+		Price:             price,
+		StartYear:         startYear,
+		EndYear:           endYear,
+		BodyType:          bodyType,
+		EngineType:        engineType,
+		NumberofCylinders: numberOfCylinders,
+		CreatedAt:         time.Now().UTC(),
 	}
 }
 

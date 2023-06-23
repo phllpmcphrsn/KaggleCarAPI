@@ -30,7 +30,7 @@ func CsvReader(file *os.File, db CarDB) error {
 		
 		car := carRecord.Car
 		car.CreatedAt = createdAt
-		err = db.CreateCar(ctx, car); if err != nil {
+		_, err = db.CreateCar(ctx, car); if err != nil {
 			log.Error("Could not insert Car into database", "car", car.String(), "err", err)
 			return err
 		}

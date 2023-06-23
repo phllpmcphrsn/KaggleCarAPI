@@ -12,7 +12,7 @@ import (
 // TODO create custom db errors
 // TODO create functions without ctx
 type CarDB interface {
-	CreateCar(context.Context, *Car) error
+	CreateCar(context.Context, *Car) (int, error)
 	GetCar(*Car) (*Car, error)
 	GetCars(context.Context) ([]*Car, error)
 	GetCarById(context.Context, string) (*Car, error)
@@ -107,8 +107,10 @@ func (p *PostGresStore) TableExists() (bool, error) {
 	}
 }
 
-func (p *PostGresStore) CreateCar(ctx context.Context, c *Car) error { 
+func (p *PostGresStore) CreateCar(ctx context.Context, c *Car) (int, error) { 
 	log.Debug("Inserting a car into DB", "car", c.String())
+	var id int
+
 	insertStmt := `
 	INSERT INTO cars (
 		company, 
@@ -126,9 +128,11 @@ func (p *PostGresStore) CreateCar(ctx context.Context, c *Car) error {
 		engine_type, 
 		number_of_cylinders, 
 		created_at
-	)	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`
+	)	
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+	RETURNING id`
 
-	_, err := p.db.ExecContext(
+	err := p.db.QueryRowContext(
 		ctx, 
 		insertStmt,
 		c.Company, 
@@ -146,12 +150,14 @@ func (p *PostGresStore) CreateCar(ctx context.Context, c *Car) error {
 		c.EngineType,
 		c.NumberofCylinders,
 		c.CreatedAt,
-	)
+	).Scan(&id)
+	
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil 
+	log.Debug("Succesfully inserted row", "id", id)
+	return id, nil 
 }
 
 func (p *PostGresStore) GetCar(c *Car) (*Car, error) { return nil, nil }
@@ -164,13 +170,14 @@ func (p *PostGresStore) GetCarById(ctx context.Context, id string) (*Car, error)
 	if err != nil {
 		// TODO use custom error
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("unknown car: %d", id)
+			return nil, fmt.Errorf("unknown car: %s", id)
 		}
 		return nil, err
     }
     return car, nil
 }
 
+// TODO implement pagination
 func (p *PostGresStore) GetCars(ctx context.Context) ([]*Car, error) { 
 	selectAllStmt := "SELECT * FROM cars"
 	stmt, err := p.db.PrepareContext(ctx, selectAllStmt)
