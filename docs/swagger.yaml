@@ -1,5 +1,17 @@
+basePath: /api/v1
+host: localhost:9090
 info:
-  contact: {}
+  contact:
+    email: phllpmcphrsn@yahoo.com
+    name: API Support
+    url: https://github.com/phllpmcphrsn/KaggleCarAPI/issues
+  description: REST API for Kaggle 2023 Car Models Dataset
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Kaggle 2023 Car Models API
+  version: "1.0"
 paths:
   /example/helloworld:
     get:

@@ -1,8 +1,22 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "REST API for Kaggle 2023 Car Models Dataset",
+        "title": "Kaggle 2023 Car Models API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "https://github.com/phllpmcphrsn/KaggleCarAPI/issues",
+            "email": "phllpmcphrsn@yahoo.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
     },
+    "host": "localhost:9090",
+    "basePath": "/api/v1",
     "paths": {
         "/example/helloworld": {
             "get": {

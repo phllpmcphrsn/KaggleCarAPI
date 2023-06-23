@@ -13,6 +13,20 @@ func setLogger() {
 	log.SetDefault(logger)
 }
 
+//	@title			Kaggle 2023 Car Models API
+//	@version		1.0
+//	@description	REST API for Kaggle 2023 Car Models Dataset
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	https://github.com/phllpmcphrsn/KaggleCarAPI/issues
+//	@contact.email	phllpmcphrsn@yahoo.com
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		localhost:9090
+//	@BasePath	/api/v1
 func main() {
 	var err error
 

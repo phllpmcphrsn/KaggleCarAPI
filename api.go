@@ -3,10 +3,10 @@ package main
 import (
 	"net/http"
 
-	docs "github.com/phllpmcphrsn/KaggleCarAPI/docs"
 	"github.com/gin-gonic/gin"
-	"github.com/swaggo/gin-swagger"
+	docs "github.com/phllpmcphrsn/KaggleCarAPI/docs"
 	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	log "golang.org/x/exp/slog"
 )
@@ -27,14 +27,16 @@ func NewAPIServer(db CarDB, listenAddr string) *APIServer {
 }
 
 // PingExample godoc
-// @Summary ping example
-// @Schemes
-// @Description do ping
-// @Tags example
-// @Accept json
-// @Produce json
-// @Success 200 {string} Helloworld
-// @Router /example/helloworld [get]
+//
+//	@Summary	ping example
+//	@Schemes
+//	@Description	do ping
+//	@Tags			example
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{string}	Helloworld
+//	@Router			/example/helloworld [get]
+//
 // Ping test
 func (a *APIServer) ping(c *gin.Context) {
 	c.JSON(http.StatusOK, "PONG")
@@ -105,20 +107,6 @@ func (a *APIServer) createCar(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newCar)
 }
 
-// @title Kaggle 2023 Car Models API
-// @version 1.0
-// @description REST API for Kaggle 2023 Car Models Dataset
-// @termsOfService http://swagger.io/terms/
-
-// @contact.name API Support
-// @contact.url https://github.com/phllpmcphrsn/KaggleCarAPI/issues
-// @contact.email phllpmcphrsn@yahoo.com
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host localhost:9090
-// @BasePath /api/v1
 func (a *APIServer) StartRouter() {
 	r := gin.Default()
 
