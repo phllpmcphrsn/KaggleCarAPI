@@ -25,9 +25,115 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/example/helloworld": {
+        "/cars": {
             "get": {
-                "description": "do ping",
+                "description": "Responds with the list of all cars as JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cars"
+                ],
+                "summary": "Get Cars array",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Car"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cars/": {
+            "post": {
+                "description": "Takes a car JSON and stores in DB. Returned saved JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cars"
+                ],
+                "summary": "Store a new car",
+                "parameters": [
+                    {
+                        "description": "Car JSON",
+                        "name": "car",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.Car"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/main.Car"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/cars/{id}": {
+            "get": {
+                "description": "Returns the car with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cars"
+                ],
+                "summary": "Get single car by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search by id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/main.Car"
+                        }
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "get": {
+                "description": "Endpoint to test for liveness. It simply returns \"PONG\"",
                 "consumes": [
                     "application/json"
                 ],
@@ -37,7 +143,7 @@ const docTemplate = `{
                 "tags": [
                     "example"
                 ],
-                "summary": "ping example",
+                "summary": "Ping example",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -45,6 +151,61 @@ const docTemplate = `{
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.Car": {
+            "type": "object",
+            "properties": {
+                "bodyType": {
+                    "type": "string"
+                },
+                "company": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "drivetrain": {
+                    "type": "string"
+                },
+                "endYear": {
+                    "type": "integer"
+                },
+                "engineType": {
+                    "type": "string"
+                },
+                "fuelEconomy": {
+                    "type": "string"
+                },
+                "horsepower": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "numberOfCylinders": {
+                    "type": "string"
+                },
+                "numberOfDoors": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "string"
+                },
+                "startYear": {
+                    "type": "integer"
+                },
+                "torque": {
+                    "type": "string"
+                },
+                "transmissionType": {
+                    "type": "string"
                 }
             }
         }
@@ -58,7 +219,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Kaggle 2023 Car Models API",
-	Description:      "REST API for Kaggle 2023 Car Models Dataset",
+	Description:      "REST API for Kaggle 2023 Car Models Dataset which can be found here\nhttps://www.kaggle.com/datasets/peshimaammuzammil/2023-car-model-dataset-all-data-you-need?resource=download",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

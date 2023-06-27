@@ -13,7 +13,6 @@ import (
 // TODO create functions without ctx
 type CarDB interface {
 	CreateCar(context.Context, *Car) (int, error)
-	GetCar(*Car) (*Car, error)
 	GetCars(context.Context) ([]*Car, error)
 	GetCarById(context.Context, string) (*Car, error)
 }
@@ -65,6 +64,7 @@ func (p *PostGresStore) createTable() error {
 	)`
 
 	_, err := p.db.Exec(stmt)
+	log.Error("An error occured while creating the cars table", "err", err)
 	return err
 }
 
@@ -87,6 +87,7 @@ func (p *PostGresStore) IndexOnCompany(ctx context.Context) error {
 	indexStmt := "CREATE INDEX IF NOT EXISTS company_idx ON cars (company)"
 	_, err := p.db.ExecContext(ctx, indexStmt)
 	if err != nil {
+		log.Error("Index for column not created", "err", err)
 		return err
 	}
 	return nil
@@ -107,8 +108,8 @@ func (p *PostGresStore) TableExists() (bool, error) {
 	}
 }
 
-func (p *PostGresStore) CreateCar(ctx context.Context, c *Car) (int, error) { 
-	log.Debug("Inserting a car into DB", "car", c.String())
+func (p *PostGresStore) CreateCar(ctx context.Context, car *Car) (int, error) { 
+	log.Debug("Inserting a car into DB", "car", car.String())
 	var id int
 
 	insertStmt := `
@@ -135,24 +136,25 @@ func (p *PostGresStore) CreateCar(ctx context.Context, c *Car) (int, error) {
 	err := p.db.QueryRowContext(
 		ctx, 
 		insertStmt,
-		c.Company, 
-		c.Model, 
-		c.Horsepower, 
-		c.Torque, 
-		c.TransmissionType, 
-		c.Drivetrain, 
-		c.FuelEconomy, 
-		c.NumberOfDoors,
-		c.Price,
-		c.StartYear,
-		c.EndYear,
-		c.BodyType,
-		c.EngineType,
-		c.NumberofCylinders,
-		c.CreatedAt,
+		&car.Company, 
+		&car.Model, 
+		&car.Horsepower, 
+		&car.Torque, 
+		&car.TransmissionType, 
+		&car.Drivetrain, 
+		&car.FuelEconomy, 
+		&car.NumberOfDoors,
+		&car.Price,
+		&car.StartYear,
+		&car.EndYear,
+		&car.BodyType,
+		&car.EngineType,
+		&car.NumberofCylinders,
+		&car.CreatedAt,
 	).Scan(&id)
 	
 	if err != nil {
+		log.Error("An error occurred while inserting to db", "err", err)
 		return 0, err
 	}
 
@@ -160,21 +162,36 @@ func (p *PostGresStore) CreateCar(ctx context.Context, c *Car) (int, error) {
 	return id, nil 
 }
 
-func (p *PostGresStore) GetCar(c *Car) (*Car, error) { return nil, nil }
-
 func (p *PostGresStore) GetCarById(ctx context.Context, id string) (*Car, error) {
-	var car *Car
+	var car Car
 
     // Query for a value based on a single row.
-    err := p.db.QueryRowContext(ctx, "SELECT * from album where id = $1", id).Scan(&car)
+    err := p.db.QueryRowContext(ctx, "SELECT * FROM cars WHERE id = $1", id).Scan(
+		&car.ID,
+		&car.Company, 
+		&car.Model, 
+		&car.Horsepower, 
+		&car.Torque, 
+		&car.TransmissionType, 
+		&car.Drivetrain, 
+		&car.FuelEconomy, 
+		&car.NumberOfDoors,
+		&car.Price,
+		&car.StartYear,
+		&car.EndYear,
+		&car.BodyType,
+		&car.EngineType,
+		&car.NumberofCylinders,
+		&car.CreatedAt,
+	)
 	if err != nil {
 		// TODO use custom error
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("unknown car: %s", id)
+			return nil, fmt.Errorf("car not found: %s", id)
 		}
 		return nil, err
     }
-    return car, nil
+    return &car, nil
 }
 
 // TODO implement pagination
@@ -194,13 +211,34 @@ func (p *PostGresStore) GetCars(ctx context.Context) ([]*Car, error) {
 	cars := []*Car{}
 	for rows.Next() {
 		car := new(Car)
-		if err := rows.Scan(&car); err != nil {
-			return cars, nil
+		err = rows.Scan(		
+			&car.ID,
+			&car.Company, 
+			&car.Model, 
+			&car.Horsepower, 
+			&car.Torque, 
+			&car.TransmissionType, 
+			&car.Drivetrain, 
+			&car.FuelEconomy, 
+			&car.NumberOfDoors,
+			&car.Price,
+			&car.StartYear,
+			&car.EndYear,
+			&car.BodyType,
+			&car.EngineType,
+			&car.NumberofCylinders,
+			&car.CreatedAt,
+		)
+		
+		if err != nil {
+			return nil, err
 		}
 		cars = append(cars, car)
 	}
+
+	// catch any errors that may have occurred during loop
 	if err = rows.Err(); err != nil {
-		return cars, err
+		return nil, err
 	}
 	return cars, nil
 }

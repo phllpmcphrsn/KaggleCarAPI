@@ -26,25 +26,30 @@ func NewAPIServer(db CarDB, listenAddr string) *APIServer {
 	}
 }
 
-// PingExample godoc
+// Ping godoc
 //
-//	@Summary	ping example
-//	@Schemes
-//	@Description	do ping
+//	@Summary		Ping example
+//	@Description	Endpoint to test for liveness. It simply returns "PONG"
 //	@Tags			example
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{string}	Helloworld
-//	@Router			/example/helloworld [get]
-//
-// Ping test
+//	@Success		200	{string}	PONG
+//	@Router			/ping [get]
 func (a *APIServer) ping(c *gin.Context) {
 	c.JSON(http.StatusOK, "PONG")
 }
 
 // GET endpoints/methods
 
-// getCars returns all cars
+// GetCars godoc
+//
+//	@Summary		Get Cars array
+//	@Description	Responds with the list of all cars as JSON
+//	@Tags			cars
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{array}	Car	"ok"
+//	@Router			/cars [get]
 func (a *APIServer) getCars(c *gin.Context) {
 	cars, err := a.db.GetCars(c)
 	if err != nil {
@@ -54,7 +59,16 @@ func (a *APIServer) getCars(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, cars)
 }
 
-// getCarById gets a car by the id supplied in the path
+// GetCarById godoc
+//
+//	@Summary		Get single car by id
+//	@Description	Returns the car with the given id
+//	@Tags			cars
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"search by id"
+//	@Success		200	{object}	Car		"ok"
+//	@Router			/cars/{id} [get]
 func (a *APIServer) getCarById(c *gin.Context) {
 	id := c.Param("id")
 	car, err := a.db.GetCarById(c, id)
@@ -68,7 +82,18 @@ func (a *APIServer) getCarById(c *gin.Context) {
 
 // POST endpoints/methods
 
-// createCar adds a new car to the db
+// CreateCar godoc
+//
+//	@Summary		Store a new car
+//	@Description	Takes a car JSON and stores in DB. Returned saved JSON
+//	@Tags			cars
+//	@Accept			json
+//	@Produce		json
+//	@Param			car	body		Car	true	"Car JSON"
+//	@Success		200	{object}	Car	"ok"
+//	@Failure		400	{object}	map[string]any
+//	@Failure		500	{object}	map[string]any
+//	@Router			/cars/ [post]
 func (a *APIServer) createCar(c *gin.Context) {
 	var (
 		newCar *Car
@@ -77,6 +102,7 @@ func (a *APIServer) createCar(c *gin.Context) {
 	)
 
 	if err := c.BindJSON(&newCar); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Received bad request."})
 		return
 	}
 
@@ -99,7 +125,8 @@ func (a *APIServer) createCar(c *gin.Context) {
 
 	// TODO check for duplicates. Call to DB with Car given (SELECT-statement)
 	if id, err = a.db.CreateCar(c, newCar); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Could not insert Car into DB.", "err": err.Error()})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Could not insert Car into DB."})
+		log.Error("Could not insert Car into DB", "err", err)
 		return
 	}
 

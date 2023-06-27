@@ -15,7 +15,8 @@ func setLogger() {
 
 //	@title			Kaggle 2023 Car Models API
 //	@version		1.0
-//	@description	REST API for Kaggle 2023 Car Models Dataset
+//	@description	REST API for Kaggle 2023 Car Models Dataset which can be found here 
+//	@description	https://www.kaggle.com/datasets/peshimaammuzammil/2023-car-model-dataset-all-data-you-need?resource=download
 //	@termsOfService	http://swagger.io/terms/
 
 //	@contact.name	API Support

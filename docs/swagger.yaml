@@ -1,11 +1,49 @@
 basePath: /api/v1
+definitions:
+  main.Car:
+    properties:
+      bodyType:
+        type: string
+      company:
+        type: string
+      createdAt:
+        type: string
+      drivetrain:
+        type: string
+      endYear:
+        type: integer
+      engineType:
+        type: string
+      fuelEconomy:
+        type: string
+      horsepower:
+        type: string
+      id:
+        type: integer
+      model:
+        type: string
+      numberOfCylinders:
+        type: string
+      numberOfDoors:
+        type: string
+      price:
+        type: string
+      startYear:
+        type: integer
+      torque:
+        type: string
+      transmissionType:
+        type: string
+    type: object
 host: localhost:9090
 info:
   contact:
     email: phllpmcphrsn@yahoo.com
     name: API Support
     url: https://github.com/phllpmcphrsn/KaggleCarAPI/issues
-  description: REST API for Kaggle 2023 Car Models Dataset
+  description: |-
+    REST API for Kaggle 2023 Car Models Dataset which can be found here
+    https://www.kaggle.com/datasets/peshimaammuzammil/2023-car-model-dataset-all-data-you-need?resource=download
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -13,11 +51,81 @@ info:
   title: Kaggle 2023 Car Models API
   version: "1.0"
 paths:
-  /example/helloworld:
+  /cars:
     get:
       consumes:
       - application/json
-      description: do ping
+      description: Responds with the list of all cars as JSON
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            items:
+              $ref: '#/definitions/main.Car'
+            type: array
+      summary: Get Cars array
+      tags:
+      - cars
+  /cars/:
+    post:
+      consumes:
+      - application/json
+      description: Takes a car JSON and stores in DB. Returned saved JSON
+      parameters:
+      - description: Car JSON
+        in: body
+        name: car
+        required: true
+        schema:
+          $ref: '#/definitions/main.Car'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/main.Car'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Store a new car
+      tags:
+      - cars
+  /cars/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns the car with the given id
+      parameters:
+      - description: search by id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/main.Car'
+      summary: Get single car by id
+      tags:
+      - cars
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: Endpoint to test for liveness. It simply returns "PONG"
       produces:
       - application/json
       responses:
@@ -25,7 +133,7 @@ paths:
           description: OK
           schema:
             type: string
-      summary: ping example
+      summary: Ping example
       tags:
       - example
 swagger: "2.0"
