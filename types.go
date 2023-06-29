@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-// TODO split out model_year_range to be start and end years. also, should those years be int or date?
-// TODO transform this into a Car instead of a CarRecord. Essentially, we'll do any and all trasformations
-// within this struct instead of making two separate structs (i.e. separating year range, money conversions)
-// CarRecord will hold each row from the dataset
 type CarRecord struct {
 	*Car
 	ModelYearRange    string    `csv:"Model Year Range"`

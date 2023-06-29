@@ -12,16 +12,20 @@ import (
 )
 
 func CsvReader(file *os.File, db CarDB) error {
-	// store each row into a struct
 	carRecords := []*CarRecord{}
 	if err := gocsv.Unmarshal(file, &carRecords); err != nil {
-		log.Error("Unable to unmarshal file contents", "filename", inputFile, "err", err)
+		log.Error("Unable to unmarshal file contents", "filename", file, "err", err)
 		return err
 	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	
+	// set all created times to the same time
 	createdAt := time.Now().UTC()
+
+	// loop through each record that was unmarshalled from the CSV, cleaning
+	// 
 	for _, carRecord := range carRecords {
 		err := clean(carRecord); if err != nil {
 			log.Error("There was an issue cleaning a CarRecord", "car", carRecord)
@@ -39,7 +43,7 @@ func CsvReader(file *os.File, db CarDB) error {
 	return nil
 }
 
-// clean takes a car and cleans up the data for price and model year range
+// clean takes a car and cleans up the data for the model year range
 func clean(c *CarRecord) error {
 	err := cleanYears(c)
 	// err = cleanPrice(c)
@@ -53,6 +57,7 @@ func cleanYears(c *CarRecord) error {
 	if trimmedYearRange == "" {
 		return nil
 	}
+
 	// the year range may have spacing between the hyphen and years (i.e. 2008 - 2012)
 	// we eliminate those then split about the hyphen to produce a two-element array
 	// (i.e. [2008, 2012])
@@ -84,4 +89,5 @@ func checkEndYear(endYear string) (int, error) {
 	return strconv.Atoi(endYear)
 }
 
+// TODO figure out if we even want to clean the price
 // func cleanPrice(p string) {}

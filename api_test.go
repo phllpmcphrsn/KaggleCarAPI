@@ -2,12 +2,9 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +19,7 @@ func TestPing(t *testing.T) {
 
 	
 	// Initialize the db field with a mock database implementation for testing
-	a := NewAPIServer(&mockDB{}, "")
+	a := NewAPIServer(&MockDB{}, "")
 
 	// call the ping handler
 	a.ping(c)
@@ -43,7 +40,7 @@ func TestGetCars(t *testing.T) {
 	// create a mock gin context
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	a := NewAPIServer(&mockDB{}, "")
+	a := NewAPIServer(&MockDB{}, "")
 
 	// call the getCars handler
 	a.getCars(c)
@@ -84,7 +81,7 @@ func TestGetCarById(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a new Gin router and set up the route for testing
 			router := gin.Default()
-			api := NewAPIServer(&mockDB{}, "")
+			api := NewAPIServer(&MockDB{}, "")
 			router.GET("/cars/:id", api.getCarById)
 
 			// Create a new HTTP request with the test car ID
@@ -148,7 +145,7 @@ func TestCreateCar(t *testing.T) {
 			body := bytes.NewReader([]byte(tc.requestBody))
 			c.Request = httptest.NewRequest("POST", "/api/v1/cars", body)
 
-			a := NewAPIServer(&mockDB{}, "")
+			a := NewAPIServer(&MockDB{}, "")
 			a.createCar(c)
 
 			// Check the response status code
@@ -172,35 +169,3 @@ func TestCreateCar(t *testing.T) {
 		})
 	}
 }
-
-type mockDB struct {}
-
-func (m *mockDB) CreateCar(c context.Context, car *Car) (int, error) {
-	if car.Company == "BadCompany" {
-		return 0, fmt.Errorf("Error")
-	}
-	return 1, nil
-}
-
-func (m *mockDB) GetCars(context.Context) ([]*Car, error) {
-	cars := []*Car{
-		{ID: 1, Company: "Toyota", Model: "Corolla"},
-		{ID: 2, Company: "Ford", Model: "F150"},
-		{ID: 3, Company: "Chevrolet", Model: "Cobalt"},
-	}
-	return cars, nil
-}
-func (m *mockDB) GetCarById(c context.Context, id string) (*Car, error) {
-	var car *Car
-	if id == "1" {
-		i, _ := strconv.Atoi(id)
-		car = &Car{ID: i, Company: "Toyota", Model: "Corolla",}
-		return car, nil
-	}
-	return nil, fmt.Errorf("car not found: %s", id)
-}
-
-func (m *mockDB) GetCarByIdEmpty(id string) (*Car, error) {
-	return nil, fmt.Errorf("car not found: %s", id)
-}
-func (m *mockDB) GetCarByIdSucess(string) (*Car, error) {return nil, nil}
