@@ -14,7 +14,7 @@ import (
 func CsvReader(file *os.File, db CarDB) error {
 	carRecords := []*CarRecord{}
 	if err := gocsv.Unmarshal(file, &carRecords); err != nil {
-		log.Error("Unable to unmarshal file contents", "filename", file, "err", err)
+		log.Error("Unable to unmarshal file contents", "filename", file.Name(), "err", err)
 		return err
 	}
 
@@ -24,8 +24,8 @@ func CsvReader(file *os.File, db CarDB) error {
 	// set all created times to the same time
 	createdAt := time.Now().UTC()
 
-	// loop through each record that was unmarshalled from the CSV, cleaning
-	// 
+	// loop through each record that was unmarshalled from the CSV then clean
+	// up the year range such that it is stored in as start- and end-year
 	for _, carRecord := range carRecords {
 		err := clean(carRecord); if err != nil {
 			log.Error("There was an issue cleaning a CarRecord", "car", carRecord)

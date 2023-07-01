@@ -21,6 +21,7 @@ var csvFilePath string
 var dbUser string
 var dbPass string
 
+// ensures all flag bindings occur prior to flag.Parse() being called
 func init() {
 	flag.StringVar(&configFilePath, "config", defaultConfigFilePath, configFilePathUsage)
 	flag.StringVar(&configFilePath, "c", defaultConfigFilePath, configFilePathUsage)
@@ -28,8 +29,6 @@ func init() {
 	flag.StringVar(&csvFilePath, "data", defaultCsvFilePath, csvFilePathUsage)
 	flag.StringVar(&dbUser, "dbuser", "", dbUserUsage)
 	flag.StringVar(&dbPass, "dbpass", "", dbPasswordUsage)
-
-	flag.Parse()
 }
 
 func setLogger(level log.Level) {
@@ -52,7 +51,11 @@ func setLogger(level log.Level) {
 
 //	@host		localhost:9090
 //	@BasePath	/api/v1
-func main() {
+func main() {	
+	// could place this in init() but it'll cause errors for tests
+	// error: "flag provided but not defined"
+	flag.Parse()
+	
 	var err error
 
 	// if credentials aren't given as args, look for them in the env
@@ -73,7 +76,7 @@ func main() {
 
 	setLogger(config.Log.Level)
 	
-	store, err := NewPostgresStore(dbUser, dbPass)
+	store, err := NewPostgresStore(config, Credentials{dbUser, []byte(dbPass)})
 	if err != nil {
 		log.Error("There was an issue reaching the database", "err", err)
 		panic(err)
@@ -96,7 +99,7 @@ func main() {
 		go readCsv(store)
 	}
 
-	api := NewAPIServer(store, ":9090")
+	api := NewAPIServer(store, config.API.Address, config.Env)
 	api.StartRouter()
 }
 

@@ -35,6 +35,12 @@ type DatabaseConfig struct {
 	Host string
 	Port int
 	Name string
+	SSL SSL
+}
+
+// SSL determines if SSL will be enabled for database connections
+type SSL struct {
+	Enabled bool
 }
 
 // CSVConfig holds the CSV configuration values

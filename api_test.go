@@ -19,7 +19,7 @@ func TestPing(t *testing.T) {
 
 	
 	// Initialize the db field with a mock database implementation for testing
-	a := NewAPIServer(&MockDB{}, "")
+	a := NewAPIServer(&MockDB{}, "", "")
 
 	// call the ping handler
 	a.ping(c)
@@ -31,7 +31,8 @@ func TestPing(t *testing.T) {
 
 // TestGetCars tests the getCars handler
 func TestGetCars(t *testing.T) {
-	cars := []Car{
+	mockDb := MockDB{}
+	cars := []*Car{
 		{ID: 1, Company: "Toyota", Model: "Corolla"},
 		{ID: 2, Company: "Ford", Model: "F150"},
 		{ID: 3, Company: "Chevrolet", Model: "Cobalt"},
@@ -40,7 +41,10 @@ func TestGetCars(t *testing.T) {
 	// create a mock gin context
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	a := NewAPIServer(&MockDB{}, "")
+	for _, car := range cars {
+		mockDb.CreateCar(c, car)
+	}
+	a := NewAPIServer(&mockDb, "", "")
 
 	// call the getCars handler
 	a.getCars(c)
@@ -81,7 +85,7 @@ func TestGetCarById(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a new Gin router and set up the route for testing
 			router := gin.Default()
-			api := NewAPIServer(&MockDB{}, "")
+			api := NewAPIServer(&MockDB{}, "", "")
 			router.GET("/cars/:id", api.getCarById)
 
 			// Create a new HTTP request with the test car ID
@@ -145,7 +149,7 @@ func TestCreateCar(t *testing.T) {
 			body := bytes.NewReader([]byte(tc.requestBody))
 			c.Request = httptest.NewRequest("POST", "/api/v1/cars", body)
 
-			a := NewAPIServer(&MockDB{}, "")
+			a := NewAPIServer(&MockDB{}, "", "")
 			a.createCar(c)
 
 			// Check the response status code

@@ -7,10 +7,13 @@ prod:
   log:
     level: info
 
+# obtains user/pass from envvars or commandline args
   database:
     host: localhost
     port: 5432
     name: postgres
+    ssl:
+      enabled: false
 
   csv:
     filename: "resources/Car_Models.csv"
@@ -22,11 +25,12 @@ dev:
   log:
     level: debug
 
-# obtain user/pass from envvars
   database:
     host: localhost
     port: 5432
     name: postgres
+    ssl:
+      enabled: false
 
   csv:
     filename: "resources/Car_Models.csv"

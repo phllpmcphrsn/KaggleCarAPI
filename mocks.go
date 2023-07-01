@@ -6,12 +6,15 @@ import (
 	"strconv"
 )
 
+var cars []*Car
+
 type MockDB struct{}
 
 func (m *MockDB) CreateCar(c context.Context, car *Car) (int, error) {
 	if car.Company == "BadCompany" {
 		return 0, fmt.Errorf("Error")
 	}
+	cars = append(cars, car)
 	return 1, nil
 }
 
@@ -23,6 +26,7 @@ func (m *MockDB) GetCars(context.Context) ([]*Car, error) {
 	}
 	return cars, nil
 }
+
 func (m *MockDB) GetCarById(c context.Context, id string) (*Car, error) {
 	var car *Car
 	if id == "1" {

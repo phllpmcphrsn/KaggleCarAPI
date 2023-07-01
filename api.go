@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	docs "github.com/phllpmcphrsn/KaggleCarAPI/docs"
@@ -17,12 +18,14 @@ const basePath = "/api/v1"
 type APIServer struct {
 	db         CarDB
 	listenAddr string
+	env        string
 }
 
-func NewAPIServer(db CarDB, listenAddr string) *APIServer {
+func NewAPIServer(db CarDB, listenAddr, env string) *APIServer {
 	return &APIServer{
 		db:         db,
 		listenAddr: listenAddr,
+		env:        env,
 	}
 }
 
@@ -136,7 +139,10 @@ func (a *APIServer) createCar(c *gin.Context) {
 
 func (a *APIServer) StartRouter() {
 	r := gin.Default()
-
+	if os.Getenv(gin.EnvGinMode) == "" {
+		mode := ginEnvMode(a.env)
+		gin.SetMode(mode) // set this based on production or development env
+	}
 	// setup Swagger
 	docs.SwaggerInfo.BasePath = basePath
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -152,4 +158,15 @@ func (a *APIServer) StartRouter() {
 	}
 
 	r.Run(a.listenAddr)
+}
+
+func ginEnvMode(env string) string {
+	switch env {
+	case "prod":
+		return gin.ReleaseMode
+	case "dev":
+		return gin.DebugMode
+	default:
+		return gin.TestMode
+	}
 }

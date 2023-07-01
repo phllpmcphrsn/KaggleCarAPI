@@ -53,3 +53,8 @@ func NewCar(company, model, horsepower, torque, transmissionType, drivetrain, fu
 func (c *Car) String() string {
 	return fmt.Sprintf("%s %s", c.Company, c.Model)
 }
+
+type Credentials struct {
+	Username string
+	Password []byte
+}
