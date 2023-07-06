@@ -1,3 +1,5 @@
+# TODO: add Docker-related targets
+
 build:
 	go build -o kagglecarapi
 
