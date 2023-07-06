@@ -22,7 +22,7 @@ type PostGresStore struct {
 	db *sql.DB
 }
 
-func NewPostgresStore(c *Config, creds Credentials) (*PostGresStore, error) {
+func NewPostgresStore(c *Config, creds *Credentials) (*PostGresStore, error) {
 	dbConfig := c.Database
 	
 	var ssl string

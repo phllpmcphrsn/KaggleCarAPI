@@ -42,6 +42,7 @@ func (a *APIServer) ping(c *gin.Context) {
 	c.JSON(http.StatusOK, "PONG")
 }
 
+// TODO add pagination (and filters/sorting?)
 // GET endpoints/methods
 
 // GetCars godoc
@@ -143,6 +144,7 @@ func (a *APIServer) StartRouter() {
 		mode := ginEnvMode(a.env)
 		gin.SetMode(mode) // set this based on production or development env
 	}
+
 	// setup Swagger
 	docs.SwaggerInfo.BasePath = basePath
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -151,7 +153,7 @@ func (a *APIServer) StartRouter() {
 	v1 := r.Group(basePath)
 	{
 		v1.GET("/ping", a.ping)
-		v1.GET("/cars", a.getCars)
+		v1.GET("/cars/", a.getCars)
 		v1.GET("/cars/:id", a.getCarById)
 		v1.POST("/cars", a.createCar)
 

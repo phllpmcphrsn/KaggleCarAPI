@@ -2,59 +2,106 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/gocarina/gocsv"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCsvReader(t *testing.T) {
+	// Create a temporary CSV file with the test case content
+	file, err := ioutil.TempFile("", "cars-*.csv")
+	if err != nil {
+		fmt.Println("Failed to create temporary file:", err)
+		t.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+	defer file.Close()
+	
+	if err = addCSVHeaders(file); err != nil {
+		t.Fatalf("Could not add csv headers to file: %s", err.Error())
+	}
+	
+
 	testCases := []struct {
 		name           string
-		fileContent    string
+		fileContent		[]*CarRecord
 		expectedError  bool
-		expectedYears  []int
+		expectedStartYears  []int
 		expectedEndYear int
 	}{
 		{
 			name: "Valid File",
-			fileContent: validCsv,
 			expectedError: false,
-			expectedYears:  []int{2018, 2020},
+			// fileContent: []*CarRecord{
+			// 	{
+			// 		Car: &Car{
+			// 			Company:           "Toyota",
+			// 			Model:             "Corolla",
+			// 			Horsepower:        "140 hp",
+			// 			Torque:            "126 lb-ft",
+			// 			TransmissionType:  "Automatic",
+			// 			Drivetrain:        "Front-Wheel Drive",
+			// 			FuelEconomy:       "31/40 mpg",
+			// 			NumberOfDoors:     "4",
+			// 			Price:             "$20,000",
+			// 			BodyType:          "Sedan",
+			// 			EngineType:        "Inline-4",
+			// 			NumberofCylinders: "4",
+			// 		},
+			// 		ModelYearRange: "2015 - 2020",
+			// 	},
+			// 	{
+			// 		Car: &Car{
+			// 			Company:           "Honda",
+			// 			Model:             "Civic",
+			// 			Horsepower:        "158 hp",
+			// 			Torque:            "138 lb-ft",
+			// 			TransmissionType:  "CVT",
+			// 			Drivetrain:        "Front-Wheel Drive",
+			// 			FuelEconomy:       "30/38 mpg",
+			// 			NumberOfDoors:     "4",
+			// 			Price:             "$19,500",
+			// 			BodyType:          "Sedan",
+			// 			EngineType:        "Inline-4",
+			// 			NumberofCylinders: "4",
+			// 		},
+			// 		ModelYearRange: "2017 - 2022",
+			// 	},
+			// },
+			expectedStartYears:  []int{2015, 2017},
 			expectedEndYear: time.Now().Year(),
 		},
 		{
 			name:          "Empty File",
-			fileContent:   "",
+			fileContent:   nil,
 			expectedError: true,
 		},
 		{
 			name: "Invalid File",
-			fileContent: invalidCsv,
+			fileContent: []*CarRecord{},
 			expectedError: true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create a temporary CSV file with the test case content
-			tempFile, err := os.CreateTemp("", "test.csv")
-			defer os.Remove(tempFile.Name())
-			defer tempFile.Close()
-			assert.NoError(t, err)
-
-			err = createTempCSVFile(tempFile, tc.fileContent)
-			assert.NoError(t, err)
-
-			// move the pointer back to the top of tempfile for further reading
-			// ret, _ := tempFile.Seek(0,0)
-			// t.Log(ret)
 			// Create a mock CarDB implementation for testing
-			mockDB := &MockDB{}
+			mockDB := &MockDB{}			
 
-			// Invoke the CsvReader function with the temporary file and mock DB
-			err = CsvReader(tempFile, mockDB)
+			// Use the gocsv package to write the array of CarRecords to the CSV file
+			err = gocsv.MarshalFile(&tc.fileContent, file)
+			assert.NoError(t, err)
+			
+			// Need to move cursor back to the top if we're expecting more than just headers
+			if !tc.expectedError {
+				file.Seek(1,0)
+			}
+			err = CsvReader(file, mockDB)
 
 			// Assert the expected error
 			if tc.expectedError {
@@ -72,7 +119,7 @@ func TestCsvReader(t *testing.T) {
 			for _, car := range cars{
 				actualYears = append(actualYears, car.StartYear)
 			}
-			assert.ElementsMatch(t, tc.expectedYears, actualYears)
+			assert.ElementsMatch(t, tc.expectedStartYears, actualYears)
 
 			// Assert the expected end year
 			// var actualEndYear int
@@ -84,18 +131,15 @@ func TestCsvReader(t *testing.T) {
 	}
 }
 
-// Helper function to create a temporary CSV file with the given content
-func createTempCSVFile(tempFile *os.File, content string) error {
-	_, err := tempFile.WriteString(content)
-	if err != nil {
+// Helper function to create a temporary CSV file
+func addCSVHeaders(file *os.File) error {
+	carRecord := []*CarRecord{}
+
+	// Use the gocsv package to write the array of CarRecords to the CSV file
+	if err := gocsv.MarshalFile(carRecord, file); err != nil {
+		fmt.Println("Failed to write headers to CSV file:", err)
 		return err
 	}
-
 	return nil
 }
 
-var validCsv = []*CarRecord{
-	{Car:{"Ferrari","812 Superfast","789 hp","530 lb-ft","7-speed automatic","RWD","13/20 mpg",2,"$366,712","Coupe","6.5L V12",12,},ModelYearRange: "2018 - Present"},
-	{Car:{"Ferrari","F8 Tributo","710 hp","568 lb-ft","7-speed automatic","RWD","15/19 mpg",2,"$276,550","Coupe","3.9L V8",8},ModelYearRange: "2020 - Present"},
-}
-const invalidCsv = `Company,Model,Horsepower,Torque,Transmission Type,Drivetrain,Fuel Economy,Number of Doors,Price,Model Year Range,Body Type,Engine Type,Number of Cylinders`

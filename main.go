@@ -55,7 +55,7 @@ func main() {
 	// could place this in init() but it'll cause errors for tests
 	// error: "flag provided but not defined"
 	flag.Parse()
-	
+
 	var err error
 
 	// if credentials aren't given as args, look for them in the env
@@ -76,7 +76,7 @@ func main() {
 
 	setLogger(config.Log.Level)
 	
-	store, err := NewPostgresStore(config, Credentials{dbUser, []byte(dbPass)})
+	store, err := NewPostgresStore(config, &Credentials{dbUser, []byte(dbPass)})
 	if err != nil {
 		log.Error("There was an issue reaching the database", "err", err)
 		panic(err)

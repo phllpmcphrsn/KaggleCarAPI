@@ -11,7 +11,7 @@ type CarRecord struct {
 }
 
 type Car struct {
-	ID                int       `json:"id"`
+	ID                int       `csv:"-" json:"id"`
 	Company           string    `csv:"Company" json:"company"`
 	Model             string    `csv:"Model" json:"model"`
 	Horsepower        string    `csv:"Horsepower" json:"horsepower"`
@@ -21,12 +21,12 @@ type Car struct {
 	FuelEconomy       string    `csv:"Fuel Economy" json:"fuelEconomy"`
 	NumberOfDoors     string    `csv:"Number of Doors" json:"numberOfDoors"`
 	Price             string    `csv:"Price" json:"price"`
-	StartYear         int       `json:"startYear"`
-	EndYear           int       `json:"endYear"`
+	StartYear         int       `csv:"-" json:"startYear"`
+	EndYear           int       `csv:"-" json:"endYear"`
 	BodyType          string    `csv:"Body Type" json:"bodyType"`
 	EngineType        string    `csv:"Engine Type" json:"engineType"`
 	NumberofCylinders string    `csv:"Number of Cylinders" json:"numberOfCylinders"`
-	CreatedAt         time.Time `json:"createdAt"`
+	CreatedAt         time.Time `csv:"-" json:"createdAt"`
 }
 
 // NewCar creates a new Car instance with the given parameters
