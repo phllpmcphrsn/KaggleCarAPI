@@ -5,17 +5,13 @@ import (
 	"time"
 )
 
-// TODO split out model_year_range to be start and end years. also, should those years be int or date?
-// TODO transform this into a Car instead of a CarRecord. Essentially, we'll do any and all trasformations
-// within this struct instead of making two separate structs (i.e. separating year range, money conversions)
-// CarRecord will hold each row from the dataset
 type CarRecord struct {
 	*Car
 	ModelYearRange    string    `csv:"Model Year Range"`
 }
 
 type Car struct {
-	ID                int       `json:"id"`
+	ID                int       `csv:"-" json:"id"`
 	Company           string    `csv:"Company" json:"company"`
 	Model             string    `csv:"Model" json:"model"`
 	Horsepower        string    `csv:"Horsepower" json:"horsepower"`
@@ -25,12 +21,12 @@ type Car struct {
 	FuelEconomy       string    `csv:"Fuel Economy" json:"fuelEconomy"`
 	NumberOfDoors     string    `csv:"Number of Doors" json:"numberOfDoors"`
 	Price             string    `csv:"Price" json:"price"`
-	StartYear         int       `json:"startYear"`
-	EndYear           int       `json:"endYear"`
+	StartYear         int       `csv:"-" json:"startYear"`
+	EndYear           int       `csv:"-" json:"endYear"`
 	BodyType          string    `csv:"Body Type" json:"bodyType"`
 	EngineType        string    `csv:"Engine Type" json:"engineType"`
 	NumberofCylinders string    `csv:"Number of Cylinders" json:"numberOfCylinders"`
-	CreatedAt         time.Time `json:"createdAt"`
+	CreatedAt         time.Time `csv:"-" json:"createdAt"`
 }
 
 // NewCar creates a new Car instance with the given parameters
@@ -56,4 +52,9 @@ func NewCar(company, model, horsepower, torque, transmissionType, drivetrain, fu
 
 func (c *Car) String() string {
 	return fmt.Sprintf("%s %s", c.Company, c.Model)
+}
+
+type Credentials struct {
+	Username string
+	Password []byte
 }

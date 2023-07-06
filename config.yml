@@ -1,0 +1,36 @@
+# which env are we working in
+env: dev
+prod:
+  api:
+    address: ":9090"
+
+  log:
+    level: info
+
+# obtains user/pass from envvars or commandline args
+  database:
+    host: localhost
+    port: 5432
+    name: postgres
+    ssl:
+      enabled: false
+
+  csv:
+    filename: "resources/Car_Models.csv"
+
+dev:
+  api:
+    address: ":9090"
+
+  log:
+    level: debug
+
+  database:
+    host: localhost
+    port: 5432
+    name: postgres
+    ssl:
+      enabled: false
+
+  csv:
+    filename: "resources/Car_Models.csv"
