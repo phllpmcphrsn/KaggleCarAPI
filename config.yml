@@ -1,3 +1,6 @@
+# TODO think about adding page size (pagination)
+# TODO think about adding root path for URL
+
 # which env are we working in
 env: dev
 prod:

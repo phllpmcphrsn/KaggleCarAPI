@@ -13,8 +13,9 @@ import (
 // TODO create functions without ctx
 type CarDB interface {
 	CreateCar(context.Context, *Car) (int, error)
-	GetCars(context.Context) ([]*Car, error)
+	GetCars(context.Context, *Pagination) ([]*Car, error)
 	GetCarById(context.Context, string) (*Car, error)
+	Count() (int, error)
 }
 
 type PostGresStore struct {
@@ -204,8 +205,16 @@ func (p *PostGresStore) GetCarById(ctx context.Context, id string) (*Car, error)
 }
 
 // TODO implement pagination
-func (p *PostGresStore) GetCars(ctx context.Context) ([]*Car, error) { 
+func (p *PostGresStore) GetCars(ctx context.Context, page *Pagination) ([]*Car, error) { 
 	selectAllStmt := "SELECT * FROM cars"
+	if page != nil {
+		if page.Limit > 0 {
+			selectAllStmt = selectAllStmt + " LIMIT $1 "
+		}
+		if page.Offset > 1 {
+			selectAllStmt = selectAllStmt + " OFFSET $1 "
+		}
+	}
 	stmt, err := p.db.PrepareContext(ctx, selectAllStmt)
 	if err != nil {
 		return nil, err

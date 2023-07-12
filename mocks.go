@@ -18,7 +18,7 @@ func (m *MockDB) CreateCar(c context.Context, car *Car) (int, error) {
 	return 1, nil
 }
 
-func (m *MockDB) GetCars(context.Context) ([]*Car, error) {
+func (m *MockDB) GetCars(context.Context, *Pagination) ([]*Car, error) {
 	cars := []*Car{
 		{ID: 1, Company: "Toyota", Model: "Corolla"},
 		{ID: 2, Company: "Ford", Model: "F150"},
@@ -35,4 +35,8 @@ func (m *MockDB) GetCarById(c context.Context, id string) (*Car, error) {
 		return car, nil
 	}
 	return nil, fmt.Errorf("car not found: %s", id)
+}
+
+func (m *MockDB) Count() (int, error) {
+	return 0, nil
 }

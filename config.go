@@ -43,12 +43,12 @@ type SSL struct {
 	Enabled bool
 }
 
-// CSVConfig holds the CSV configuration values
+// CSVConfig holds the CSV configuration values.
 type CSVConfig struct {
 	Filename string
 }
 
-// LoadConfig loads the configuration values from the specified file
+// LoadConfig loads the configuration values from the specified file.
 func LoadConfig(file string) (*Config, error) {
 	// Set the file name and path
 	if file != "" {
@@ -83,7 +83,7 @@ func LoadConfig(file string) (*Config, error) {
 	return &config, nil
 }
 
-// GetConfigFilePath returns the absolute path of the config file based on the current directory
+// GetConfigFilePath returns the absolute path of the config file based on the current directory.
 func GetConfigFilePath() string {
 	dir, err := os.Getwd()
 	if err != nil {
@@ -94,8 +94,10 @@ func GetConfigFilePath() string {
 
 // GetLogLevel returns the slog log level based on a string representation of the log level.
 // INFO is used as the default in case a level isn't given or is unexpected
-func GetLogLevel(level string) log.Level {
-	level = strings.ToLower(level)
+func GetLogLevel(logLevel string) log.Level {
+	level := strings.ToLower(logLevel)
+	print(level)
+	log.Info(level)
 	switch level {
 	case "debug":
 		return log.LevelDebug

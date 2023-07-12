@@ -58,3 +58,8 @@ type Credentials struct {
 	Username string
 	Password []byte
 }
+
+type Pagination struct {
+	Offset uint
+	Limit uint
+}

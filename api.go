@@ -1,8 +1,10 @@
 package main
 
 import (
+	"math"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	docs "github.com/phllpmcphrsn/KaggleCarAPI/docs"
@@ -55,12 +57,60 @@ func (a *APIServer) ping(c *gin.Context) {
 //	@Success		200	{array}	Car	"ok"
 //	@Router			/cars [get]
 func (a *APIServer) getCars(c *gin.Context) {
-	cars, err := a.db.GetCars(c)
+	// Following Github pagination style
+	// https://docs.github.com/en/rest/guides/using-pagination-in-the-rest-api?apiVersion=2022-11-28
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
 	if err != nil {
-		log.Error("There was an issue retrieving rows of Cars", "err", err)
+		log.Error("Bad request. Could not convert page parameter to integer", "err", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid page given. Double-check that a number is given."})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, cars)
+
+	if page < 1 {
+		log.Error("Bad request. Page number less than 1")
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Page number can't be less than 1."})
+		return
+	}
+
+	var count int
+	count, err = a.db.Count()
+	if err != nil {
+		log.Error("There was an issue retriving the count of cars from DB", "err", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// TODO maybe make the perpage default configurable
+	perPageStr := c.DefaultQuery("per_page", "25")
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil {
+		log.Error("Bad request. Could not convert page parameter to integer", "err", err)
+		c.AbortWithStatus((http.StatusBadRequest))
+		return
+	}
+
+
+	// Checking validity here
+	// Want to ensure we're not given a page number that doesn't exist
+	// or is too large
+	pageCount := int(math.Ceil(float64(count) / float64(perPage)))
+	if pageCount == 0 {
+		pageCount = 1
+	}
+
+	if page > pageCount {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid page given."})
+		return
+	}
+
+	offset := (page - 1) * perPage
+	cars, err = a.db.GetCars(c, &Pagination{Limit: uint(perPage), Offset: uint(offset)})
+	if err != nil {
+		log.Error("There was an issue retrieving rows of Cars", "err", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 }
 
 // GetCarById godoc
@@ -106,7 +156,7 @@ func (a *APIServer) createCar(c *gin.Context) {
 	)
 
 	if err := c.BindJSON(&newCar); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Received bad request."})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid car given."})
 		return
 	}
 

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -14,7 +13,7 @@ import (
 
 func TestCsvReader(t *testing.T) {
 	// Create a temporary CSV file with the test case content
-	file, err := ioutil.TempFile("", "cars-*.csv")
+	file, err := os.CreateTemp("", "cars-*.csv")
 	if err != nil {
 		fmt.Println("Failed to create temporary file:", err)
 		t.Fatal(err)
@@ -112,7 +111,7 @@ func TestCsvReader(t *testing.T) {
 
 			// Assert the expected years
 			ctx := context.TODO()
-			cars, err = mockDB.GetCars(ctx)
+			cars, err = mockDB.GetCars(ctx, nil)
 			assert.NoError(t, err)
 			
 			var actualYears []int
