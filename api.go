@@ -55,7 +55,7 @@ func (a *APIServer) ping(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{array}	Car	"ok"
-//	@Router			/cars [get]
+//	@Router			/cars/{page} [get]
 func (a *APIServer) getCars(c *gin.Context) {
 	// Following Github pagination style
 	// https://docs.github.com/en/rest/guides/using-pagination-in-the-rest-api?apiVersion=2022-11-28

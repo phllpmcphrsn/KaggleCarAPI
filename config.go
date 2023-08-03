@@ -76,7 +76,7 @@ func LoadConfig(file string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+	log.Info(config.Log.LevelStr)
 	// Get a valid slog log level
 	config.Log.Level = GetLogLevel(config.Log.LevelStr)
 

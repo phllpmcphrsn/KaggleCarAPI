@@ -25,7 +25,7 @@ type PostGresStore struct {
 
 func NewPostgresStore(c *Config, creds *Credentials) (*PostGresStore, error) {
 	dbConfig := c.Database
-	
+
 	var ssl string
 	if dbConfig.SSL.Enabled {
 		ssl = "enabled"
@@ -118,7 +118,7 @@ func (p *PostGresStore) TableExists() (bool, error) {
 	}
 }
 
-func (p *PostGresStore) CreateCar(ctx context.Context, car *Car) (int, error) { 
+func (p *PostGresStore) CreateCar(ctx context.Context, car *Car) (int, error) {
 	log.Debug("Inserting a car into DB", "car", car.String())
 	var id int
 
@@ -144,15 +144,15 @@ func (p *PostGresStore) CreateCar(ctx context.Context, car *Car) (int, error) {
 	RETURNING id`
 
 	err := p.db.QueryRowContext(
-		ctx, 
+		ctx,
 		insertStmt,
-		&car.Company, 
-		&car.Model, 
-		&car.Horsepower, 
-		&car.Torque, 
-		&car.TransmissionType, 
-		&car.Drivetrain, 
-		&car.FuelEconomy, 
+		&car.Company,
+		&car.Model,
+		&car.Horsepower,
+		&car.Torque,
+		&car.TransmissionType,
+		&car.Drivetrain,
+		&car.FuelEconomy,
 		&car.NumberOfDoors,
 		&car.Price,
 		&car.StartYear,
@@ -162,29 +162,29 @@ func (p *PostGresStore) CreateCar(ctx context.Context, car *Car) (int, error) {
 		&car.NumberofCylinders,
 		&car.CreatedAt,
 	).Scan(&id)
-	
+
 	if err != nil {
 		log.Error("An error occurred while inserting to db", "err", err)
 		return 0, err
 	}
 
 	log.Debug("Succesfully inserted row", "id", id)
-	return id, nil 
+	return id, nil
 }
 
 func (p *PostGresStore) GetCarById(ctx context.Context, id string) (*Car, error) {
 	var car Car
 
-    // Query for a value based on a single row.
-    err := p.db.QueryRowContext(ctx, "SELECT * FROM cars WHERE id = $1", id).Scan(
+	// Query for a value based on a single row.
+	err := p.db.QueryRowContext(ctx, "SELECT * FROM cars WHERE id = $1", id).Scan(
 		&car.ID,
-		&car.Company, 
-		&car.Model, 
-		&car.Horsepower, 
-		&car.Torque, 
-		&car.TransmissionType, 
-		&car.Drivetrain, 
-		&car.FuelEconomy, 
+		&car.Company,
+		&car.Model,
+		&car.Horsepower,
+		&car.Torque,
+		&car.TransmissionType,
+		&car.Drivetrain,
+		&car.FuelEconomy,
 		&car.NumberOfDoors,
 		&car.Price,
 		&car.StartYear,
@@ -200,21 +200,21 @@ func (p *PostGresStore) GetCarById(ctx context.Context, id string) (*Car, error)
 			return nil, fmt.Errorf("car not found: %s", id)
 		}
 		return nil, err
-    }
-    return &car, nil
+	}
+	return &car, nil
 }
 
 // TODO implement pagination
-func (p *PostGresStore) GetCars(ctx context.Context, page *Pagination) ([]*Car, error) { 
-	selectAllStmt := "SELECT * FROM cars"
+func (p *PostGresStore) GetCars(ctx context.Context, page *Pagination) ([]*Car, error) {
+	// pretty sure it's unlikely that page will be nil; however,
+	// in case it is I've decided to separate the paginated query
+	// to its own method. Not making that a part of the public API
+	// since this should be transparent to the user
 	if page != nil {
-		if page.Limit > 0 {
-			selectAllStmt = selectAllStmt + " LIMIT $1 "
-		}
-		if page.Offset > 1 {
-			selectAllStmt = selectAllStmt + " OFFSET $1 "
-		}
+		return p.getCarsWithPagination(ctx, page)
 	}
+	
+	selectAllStmt := "SELECT * FROM cars"
 	stmt, err := p.db.PrepareContext(ctx, selectAllStmt)
 	if err != nil {
 		return nil, err
@@ -225,19 +225,42 @@ func (p *PostGresStore) GetCars(ctx context.Context, page *Pagination) ([]*Car, 
 	if err != nil {
 		return nil, err
 	}
+
+	return p.getCars(rows)
+}
+
+func (p *PostGresStore) getCarsWithPagination(ctx context.Context, page *Pagination) ([]*Car, error) {
+	selectAllStmt := "SELECT * FROM cars LIMIT $1 OFFSET $2"
+
+	stmt, err := p.db.PrepareContext(ctx, selectAllStmt)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.QueryContext(ctx, page.Limit, page.Offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return p.getCars(rows)
+}
+
+func (*PostGresStore) getCars(rows *sql.Rows) ([]*Car, error) {
+	var err error
 	
 	cars := []*Car{}
 	for rows.Next() {
 		car := new(Car)
-		err = rows.Scan(		
+		err := rows.Scan(
 			&car.ID,
-			&car.Company, 
-			&car.Model, 
-			&car.Horsepower, 
-			&car.Torque, 
-			&car.TransmissionType, 
-			&car.Drivetrain, 
-			&car.FuelEconomy, 
+			&car.Company,
+			&car.Model,
+			&car.Horsepower,
+			&car.Torque,
+			&car.TransmissionType,
+			&car.Drivetrain,
+			&car.FuelEconomy,
 			&car.NumberOfDoors,
 			&car.Price,
 			&car.StartYear,
@@ -247,17 +270,15 @@ func (p *PostGresStore) GetCars(ctx context.Context, page *Pagination) ([]*Car, 
 			&car.NumberofCylinders,
 			&car.CreatedAt,
 		)
-		
+
 		if err != nil {
 			return nil, err
 		}
 		cars = append(cars, car)
 	}
-
 	// catch any errors that may have occurred during loop
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 	return cars, nil
 }
-
