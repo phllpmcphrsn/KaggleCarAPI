@@ -20,13 +20,15 @@ const basePath = "/api/v1"
 type APIServer struct {
 	db         CarDB
 	listenAddr string
+	basePath   string
 	env        string
 }
 
-func NewAPIServer(db CarDB, listenAddr, env string) *APIServer {
+func NewAPIServer(db CarDB, config APIConfig, env string) *APIServer {
 	return &APIServer{
 		db:         db,
-		listenAddr: listenAddr,
+		listenAddr: config.Address,
+		basePath:   config.Path,
 		env:        env,
 	}
 }
@@ -89,7 +91,6 @@ func (a *APIServer) getCars(c *gin.Context) {
 		c.AbortWithStatus((http.StatusBadRequest))
 		return
 	}
-
 
 	// Checking validity here
 	// Want to ensure we're not given a page number that doesn't exist

@@ -12,22 +12,23 @@ import (
 
 // Config holds the configuration values
 type Config struct {
-	Env      string
-	API      APIConfig
-	Log      LogLevel
-	Database DatabaseConfig
-	CSV      CSVConfig
+	Environment string
+	API         APIConfig
+	Log         LogLevel
+	Database    DatabaseConfig
+	CSV         CSVConfig
 }
 
 // APIConfig holds the API configuration values
 type APIConfig struct {
 	Address string
+	Path    string
 }
 
 // LogLevel holds the log configuration values
 type LogLevel struct {
 	LevelStr string
-	Level log.Level
+	Level    log.Level
 }
 
 // DatabaseConfig holds the database configuration values
@@ -35,7 +36,7 @@ type DatabaseConfig struct {
 	Host string
 	Port int
 	Name string
-	SSL SSL
+	SSL  SSL
 }
 
 // SSL determines if SSL will be enabled for database connections

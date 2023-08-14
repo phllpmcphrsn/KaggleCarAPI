@@ -6,6 +6,7 @@ env: dev
 prod:
   api:
     address: ":9090"
+    path: "/api/v1"
 
   log:
     level: info
@@ -24,6 +25,7 @@ prod:
 dev:
   api:
     address: ":9090"
+    path: "/api/v1"
 
   log:
     level: debug

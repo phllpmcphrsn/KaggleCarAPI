@@ -25,32 +25,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cars": {
-            "get": {
-                "description": "Responds with the list of all cars as JSON",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cars"
-                ],
-                "summary": "Get Cars array",
-                "responses": {
-                    "200": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/main.Car"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/cars/": {
             "post": {
                 "description": "Takes a car JSON and stores in DB. Returned saved JSON",
@@ -126,6 +100,32 @@ const docTemplate = `{
                         "description": "ok",
                         "schema": {
                             "$ref": "#/definitions/main.Car"
+                        }
+                    }
+                }
+            }
+        },
+        "/cars/{page}": {
+            "get": {
+                "description": "Responds with the list of all cars as JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cars"
+                ],
+                "summary": "Get Cars array",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Car"
+                            }
                         }
                     }
                 }

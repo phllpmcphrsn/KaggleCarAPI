@@ -7,6 +7,7 @@ import (
 	log "golang.org/x/exp/slog"
 )
 
+// Setting up the command line constants
 const (
 	defaultCsvFilePath = "./resources/Car_Models.csv"
 	csvFilePathUsage = "CSV file path (eg. '/etc/api/data.csv)."
@@ -16,10 +17,12 @@ const (
 	dbPasswordUsage = "Password for database. If left empty, the program will look for the DBPASS environment variable"
 )
 
-var configFilePath string
-var csvFilePath string
-var dbUser string
-var dbPass string
+var (
+	configFilePath string
+	csvFilePath string
+	dbUser string
+	dbPass string
+)
 
 // ensures all flag bindings occur prior to flag.Parse() being called
 func init() {
@@ -99,7 +102,7 @@ func main() {
 		go readCsv(store)
 	}
 
-	api := NewAPIServer(store, config.API.Address, config.Env)
+	api := NewAPIServer(store, config.API, config.Environment)
 	api.StartRouter()
 }
 

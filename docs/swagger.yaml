@@ -51,23 +51,6 @@ info:
   title: Kaggle 2023 Car Models API
   version: "1.0"
 paths:
-  /cars:
-    get:
-      consumes:
-      - application/json
-      description: Responds with the list of all cars as JSON
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ok
-          schema:
-            items:
-              $ref: '#/definitions/main.Car'
-            type: array
-      summary: Get Cars array
-      tags:
-      - cars
   /cars/:
     post:
       consumes:
@@ -119,6 +102,23 @@ paths:
           schema:
             $ref: '#/definitions/main.Car'
       summary: Get single car by id
+      tags:
+      - cars
+  /cars/{page}:
+    get:
+      consumes:
+      - application/json
+      description: Responds with the list of all cars as JSON
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            items:
+              $ref: '#/definitions/main.Car'
+            type: array
+      summary: Get Cars array
       tags:
       - cars
   /ping:
